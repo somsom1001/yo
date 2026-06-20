@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎪 크리에이티브 자리 배치 시스템 (포인트 제도)</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+    <!-- Main Style Sheet -->
+    <link rel="stylesheet" href="style.css">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="theme-chalkboard">
+
+    <div class="app-container">
+        <!-- 상단 헤더 -->
+        <header class="app-header">
+            <div class="header-logo">
+                <span class="logo-icon">🎪</span>
+                <div class="logo-text">
+                    <h1>크리에이티브 자리 배치</h1>
+                    <p>재미있고 공정한 포인트 기반 자리 배정 시스템</p>
+                </div>
+            </div>
+            <div class="header-controls">
+                <!-- 테마 셀렉터 -->
+                <div class="control-item">
+                    <label for="themeSelect"><i class="fa-solid fa-palette"></i> 테마</label>
+                    <select id="themeSelect" onchange="changeTheme(this.value)">
+                        <option value="theme-chalkboard">칠판 초록 테마</option>
+                        <option value="theme-neon">사이버펑크 네온</option>
+                        <option value="theme-warm">아늑한 원목교실</option>
+                        <option value="theme-pastel">모던 파스텔</option>
+                    </select>
+                </div>
+                <!-- 사운드 토글 -->
+                <button id="soundToggle" class="btn-icon" onclick="toggleSound()" title="사운드 켜기/끄기">
+                    <i class="fa-solid fa-volume-high"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- 메인 콘텐츠 영역 -->
+        <main class="app-main">
+            <!-- 왼쪽: 설정 및 명렬 패널 -->
+            <aside class="sidebar-panel">
+                <!-- 탭 메뉴 -->
+                <div class="tab-menu">
+                    <button class="tab-btn active" onclick="switchTab('studentTab')"><i class="fa-solid fa-users"></i> 학생 설정</button>
+                    <button class="tab-btn" onclick="switchTab('layoutTab')"><i class="fa-solid fa-table-cells"></i> 배치 및 포인트 룰</button>
+                </div>
+
+                <!-- 학생 설정 탭 -->
+                <div id="studentTab" class="tab-content active">
+                    <div class="settings-group">
+                        <h3>학생 명단 등록</h3>
+                        <p class="help-text">쉼표(,) 또는 줄바꿈으로 구분해 이름을 입력하세요.</p>
+                        <textarea id="studentInput" placeholder="강하늘, 고은아, 김도현, 김민지, 박서준, 박지민..."></textarea>
+                        <div class="btn-row">
+                            <button class="btn btn-secondary" onclick="resetToDefaultList()"><i class="fa-solid fa-arrow-rotate-left"></i> 기본 명단</button>
+                            <button class="btn btn-primary" onclick="applyAndSaveList()"><i class="fa-solid fa-floppy-disk"></i> 명렬 반영 및 저장</button>
+                        </div>
+                    </div>
+
+                    <div class="settings-group table-group">
+                        <div class="table-header-row">
+                            <h3>학생 명부 및 포인트</h3>
+                            <button class="btn btn-xs" onclick="resetAllPoints()"><i class="fa-solid fa-undo"></i> 포인트 초기화</button>
+                        </div>
+                        <div class="student-table-container">
+                            <table class="student-table">
+                                <thead>
+                                    <tr>
+                                        <th>이름</th>
+                                        <th>포인트</th>
+                                        <th>관리</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="studentTableBody">
+                                    <!-- Dynamic rows loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 배치 및 포인트 룰 탭 -->
+                <div id="layoutTab" class="tab-content">
+                    <div class="settings-group">
+                        <h3>교실 레이아웃 설정</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="gridRows">행 (가로 줄)</label>
+                                <input type="number" id="gridRows" min="1" max="10" value="4" onchange="updateGridDimensions()">
+                            </div>
+                            <div class="form-group">
+                                <label for="gridCols">열 (세로 줄)</label>
+                                <input type="number" id="gridCols" min="1" max="12" value="5" onchange="updateGridDimensions()">
+                            </div>
+                        </div>
+                        <div class="form-group margin-top">
+                            <label>책상 배열 스타일</label>
+                            <div class="radio-group">
+                                <label class="radio-label">
+                                    <input type="radio" name="seatingStyle" value="single" checked onchange="updateSeatingStyle()">
+                                    <span>개별 단독석</span>
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="seatingStyle" value="pair" onchange="updateSeatingStyle()">
+                                    <span>2인 짝꿍석</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-group margin-top">
+                            <label for="corridorInput">복도(빈 통로) 열 번호 (쉼표 구분)</label>
+                            <input type="text" id="corridorInput" placeholder="예: 2, 4 (2열과 4열 오른쪽에 복도 생성)" onchange="updateGridDimensions()">
+                        </div>
+                    </div>
+
+                    <div class="settings-group">
+                        <h3>포인트 정책 설정</h3>
+                        <div class="form-group">
+                            <label for="swapCost">드래그 앤 드롭 자리 맞바꿈 포인트 비용</label>
+                            <div class="input-with-unit">
+                                <input type="number" id="swapCost" min="0" value="10">
+                                <span>P</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="lockCost">수동 지정석(고정석) 1회 포인트 비용</label>
+                            <div class="input-with-unit">
+                                <input type="number" id="lockCost" min="0" value="20">
+                                <span>P</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>포인트 부족 시 정책</label>
+                            <select id="insufficientPointsPolicy">
+                                <option value="block">자리 교체 및 지정석 설정 불가 (차단)</option>
+                                <option value="allow-negative">마이너스 포인트 허용 및 교체 진행</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>자리 교체 시 포인트 정산 방식</label>
+                            <select id="swapPolicy">
+                                <option value="deduct-initiator">드래그한 학생(요청자) 포인트 차감</option>
+                                <option value="deduct-both">두 학생 모두 설정 비용 차감</option>
+                                <option value="pay-target">요청자가 대상 학생에게 포인트 지불 (A -> B)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- 오른쪽: 교실 전경 및 컨트롤러 -->
+            <section class="classroom-panel">
+                <!-- 제어 컨트롤 바 -->
+                <div class="control-bar">
+                    <div class="btn-group">
+                        <button class="btn btn-primary btn-lg" id="btnRandom" onclick="arrangeRandom()">
+                            <i class="fa-solid fa-shuffle"></i> 즉시 랜덤 배치
+                        </button>
+                        <button class="btn btn-accent btn-lg" id="btnRoulette" onclick="arrangeRoulette()">
+                            <i class="fa-solid fa-spinner fa-spin-hover"></i> 두근두근 룰렛 배치
+                        </button>
+                        <button class="btn btn-secondary btn-lg" onclick="resetPlacement()">
+                            <i class="fa-solid fa-arrow-rotate-right"></i> 배치 초기화
+                        </button>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-info" onclick="openLogsModal()">
+                            <i class="fa-solid fa-receipt"></i> 포인트 내역
+                        </button>
+                        <button class="btn btn-success" onclick="exportAsImage()">
+                            <i class="fa-solid fa-image"></i> 이미지 저장 (PNG)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 교실 칠판 보드 -->
+                <div class="blackboard-wrapper">
+                    <div class="blackboard">
+                        <div class="chalk-tray"></div>
+                        <span class="board-text"><i class="fa-solid fa-chalkboard"></i> 앞 (칠판 / 스크린)</span>
+                    </div>
+                </div>
+
+                <!-- 교실 자리 배정 격자 -->
+                <div class="classroom-grid-container" id="captureTarget">
+                    <!-- 드래그 중인 팝업 안내 텍스트 -->
+                    <div id="dragInstruction" class="drag-instruction">
+                        자리를 바꾸고 싶은 위치로 끌어다 놓으세요. 설정된 스왑 포인트가 차감됩니다.
+                    </div>
+                    <div class="classroom-grid" id="classroomGrid">
+                        <!-- Dynamic Seat Cards generated by JS -->
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- 포인트 거래 로그 모달 -->
+    <div id="logsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fa-solid fa-receipt"></i> 포인트 사용 및 변경 이력</h2>
+                <span class="close-btn" onclick="closeLogsModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="log-actions">
+                    <button class="btn btn-xs btn-secondary" onclick="clearLogs()"><i class="fa-solid fa-trash-can"></i> 이력 전체 삭제</button>
+                </div>
+                <div class="logs-container">
+                    <table class="logs-table">
+                        <thead>
+                            <tr>
+                                <th>일시</th>
+                                <th>학생</th>
+                                <th>구분</th>
+                                <th>변동포인트</th>
+                                <th>내용</th>
+                            </tr>
+                        </thead>
+                        <tbody id="logsTableBody">
+                            <!-- Dynamic log rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 라이브 토스트 알림 컨테이너 -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- 외부 라이브러리 CDN -->
+    <!-- canvas-confetti (축하 효과용) -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- html2canvas (배치표 이미지 저장용) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- Main Application Logic -->
+    <script src="main.js"></script>
+</body>
+</html>
